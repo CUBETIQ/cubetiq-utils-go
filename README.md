@@ -1,6 +1,8 @@
 # CUBETIQ Go Utils
 
-- String
+Includes:
+
+- String Utils
 
 # Contributors
 
