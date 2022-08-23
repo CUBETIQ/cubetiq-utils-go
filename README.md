@@ -1,8 +1,11 @@
-# CUBETIQ Go Utils
+# CUBETIQ Utils Go
 
 Includes:
 
 - String Utils
+- Env Utils
+- Jwt Utils
+- Password Utils
 
 # Contributors
 
