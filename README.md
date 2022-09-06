@@ -6,6 +6,8 @@ Includes:
 - Env Utils
 - Jwt Utils
 - Password Utils
+- File Utils
+- Number Utils
 
 # Contributors
 
