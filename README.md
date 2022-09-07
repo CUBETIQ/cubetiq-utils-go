@@ -8,6 +8,7 @@ Includes:
 - Password Utils
 - File Utils
 - Number Utils
+- Date Utils
 
 # Contributors
 
