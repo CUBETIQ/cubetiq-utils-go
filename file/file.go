@@ -49,10 +49,16 @@ func SaveMultipartToFile(c *fiber.Ctx, f *multipart.FileHeader, path string, fil
 
 // Remove a single file
 func RemoveFile(file string) {
-	os.Remove(file)
+	err := os.Remove(file)
+	if err != nil {
+		fmt.Println(err)
+	}
 }
 
 // Remove an entire directory
 func RemoveDirectory(directory string) {
-	os.RemoveAll(directory)
+	err := os.RemoveAll(directory)
+	if err != nil {
+		fmt.Println(err)
+	}
 }
