@@ -47,6 +47,12 @@ func SaveMultipartToFile(c *fiber.Ctx, f *multipart.FileHeader, path string, fil
 	return f
 }
 
-func RemoveFile(path string) {
-	os.RemoveAll(path)
+// Remove a single file
+func RemoveFile(file string) {
+	os.Remove(file)
+}
+
+// Remove an entire directory
+func RemoveDirectory(directory string) {
+	os.RemoveAll(directory)
 }
