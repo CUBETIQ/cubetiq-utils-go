@@ -46,3 +46,7 @@ func SaveMultipartToFile(c *fiber.Ctx, f *multipart.FileHeader, path string, fil
 
 	return f
 }
+
+func RemoveFile(path string) {
+	os.RemoveAll(path)
+}
