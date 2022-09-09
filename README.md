@@ -9,6 +9,7 @@ Includes:
 - File Utils
 - Number Utils
 - Date Utils
+- Error Utils
 
 # Contributors
 
