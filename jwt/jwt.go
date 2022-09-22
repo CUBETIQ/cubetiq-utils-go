@@ -14,10 +14,16 @@ type JwtWrapper struct {
 	ExpirationHours int64
 }
 
-// JwtClaim adds username as a claim to the token
+// JwtClaim adds username and user id as a claim to the token
 type JwtClaim struct {
 	Id       uint
 	Username string
+	jwt.MapClaims
+}
+
+// FileJwtClaim adds ownerkey as a claim to the token
+type FileJwtClaim struct {
+	OwnerKey string
 	jwt.MapClaims
 }
 
@@ -31,6 +37,41 @@ func (j *JwtWrapper) GenerateToken(userId uint, username string) (signedToken st
 			"exp": time.Now().Local().Add(time.Hour * time.Duration(j.ExpirationHours)).Unix(),
 			"iss": j.Issuer,
 		},
+	}
+
+	// create token
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	// generate encoded token and send it as response
+	signedToken, err = token.SignedString([]byte(j.SecretKey))
+
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+// FileGenerateSharedToken generates a jwt token for shared files
+func (j *JwtWrapper) FileGenerateSharedToken(ownerKey string) (signedToken string, err error) {
+	// create the claims
+	var claims *FileJwtClaim
+	if j.ExpirationHours == 0 {
+		claims = &FileJwtClaim{
+			OwnerKey: ownerKey,
+			MapClaims: jwt.MapClaims{
+				"exp": nil,
+				"iss": j.Issuer,
+			},
+		}
+	} else {
+		claims = &FileJwtClaim{
+			OwnerKey: ownerKey,
+			MapClaims: jwt.MapClaims{
+				"exp": time.Now().Local().Add(time.Hour * time.Duration(j.ExpirationHours)).Unix(),
+				"iss": j.Issuer,
+			},
+		}
 	}
 
 	// create token
