@@ -11,21 +11,21 @@ import (
 type JwtWrapper struct {
 	SecretKey       string
 	Issuer          string
-	IssueAt 		int64
+	IssueAt         int64
 	ExpirationHours int64
 }
 
 // JwtClaim adds username and user id as a claim to the token
 type JwtClaim struct {
-	Id       uint
-	Username string
-	jwt.MapClaims
+	Id            uint   `json:"id"`
+	Username      string `json:"username"`
+	jwt.MapClaims `json:"details"`
 }
 
 // FileJwtClaim adds ownerkey as a claim to the token
 type FileJwtClaim struct {
-	OwnerKey string
-	jwt.MapClaims
+	OwnerKey      string `json:"owner_key"`
+	jwt.MapClaims `json:"details"`
 }
 
 // GenerateToken generates a jwt token
