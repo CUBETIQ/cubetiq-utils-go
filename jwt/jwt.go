@@ -11,6 +11,7 @@ import (
 type JwtWrapper struct {
 	SecretKey       string
 	Issuer          string
+	IssueAt 		int64
 	ExpirationHours int64
 }
 
@@ -36,6 +37,7 @@ func (j *JwtWrapper) GenerateToken(userId uint, username string) (signedToken st
 		MapClaims: jwt.MapClaims{
 			"exp": time.Now().Local().Add(time.Hour * time.Duration(j.ExpirationHours)).Unix(),
 			"iss": j.Issuer,
+			"iat": j.IssueAt,
 		},
 	}
 
@@ -62,6 +64,7 @@ func (j *JwtWrapper) FileGenerateSharedToken(ownerKey string) (signedToken strin
 			MapClaims: jwt.MapClaims{
 				"exp": nil,
 				"iss": j.Issuer,
+				"iat": j.IssueAt,
 			},
 		}
 	} else {
@@ -70,6 +73,7 @@ func (j *JwtWrapper) FileGenerateSharedToken(ownerKey string) (signedToken strin
 			MapClaims: jwt.MapClaims{
 				"exp": time.Now().Local().Add(time.Hour * time.Duration(j.ExpirationHours)).Unix(),
 				"iss": j.Issuer,
+				"iat": j.IssueAt,
 			},
 		}
 	}
