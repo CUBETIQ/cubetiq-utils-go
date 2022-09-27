@@ -2,6 +2,7 @@ package string
 
 import (
 	"crypto/rand"
+	"log"
 	"math/big"
 	"strconv"
 	"strings"
@@ -17,6 +18,15 @@ func ToInt(s string) (int, error) {
 
 func ToInt64(s string) (int64, error) {
 	return strconv.ParseInt(s, 10, 64)
+}
+
+func ToBoolean(s string) (bool, error) {
+	result, err := strconv.ParseBool(s)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return result, err
 }
 
 func IsEmpty(s string) bool {
