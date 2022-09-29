@@ -3,8 +3,10 @@ package file
 import (
 	"errors"
 	"fmt"
+	"log"
 	"mime/multipart"
 	"os"
+	"strings"
 
 	stringutil "github.com/cubetiq/cubetiq-utils-go/string"
 	"github.com/gofiber/fiber/v2"
@@ -33,16 +35,24 @@ func SaveMultipartToFile(c *fiber.Ctx, f *multipart.FileHeader, path string, fil
 	extension := stringutil.GetPartOfLast(sourceFileName, ".")
 
 	// sum up for destination of file
-	destFile := destPath + "\\" + name + "." + extension
+	destFile := ""
+	if strings.HasSuffix(destPath, "/") {
+		destFile = destPath + name + "." + extension
+	} else {
+		destFile = destPath + "/" + name + "." + extension
+	}
 
 	// check destination of file not exists, it will create a directory
 	if _, err := os.Stat(destPath); errors.Is(err, os.ErrNotExist) {
 		// 0777 => public-read-write
-		os.MkdirAll(destPath, 0777)
+		os.MkdirAll(destPath, 0777) // create directory
 	}
 
 	// save file
-	c.SaveFile(f, fmt.Sprint(destFile))
+	formatFilePath := fmt.Sprint(destFile)
+	log.Println("Save file to: ", formatFilePath)
+	
+	c.SaveFile(f, formatFilePath)
 
 	return f
 }
