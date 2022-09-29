@@ -3,7 +3,6 @@ package file
 import (
 	"errors"
 	"fmt"
-	"log"
 	"mime/multipart"
 	"os"
 	"strings"
@@ -50,7 +49,6 @@ func SaveMultipartToFile(c *fiber.Ctx, f *multipart.FileHeader, path string, fil
 
 	// save file
 	formatFilePath := fmt.Sprint(destFile)
-	log.Println("Save file to: ", formatFilePath)
 	
 	c.SaveFile(f, formatFilePath)
 
