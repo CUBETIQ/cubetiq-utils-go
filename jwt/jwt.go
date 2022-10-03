@@ -2,6 +2,7 @@ package jwt
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -24,7 +25,8 @@ type JwtClaim struct {
 
 // FileJwtClaim adds ownerkey as a claim to the token
 type FileJwtClaim struct {
-	OwnerKey      string `json:"owner_key"`
+	OwnerKey      string   `json:"owner_key"`
+	FileIds       []string `json:"file_ids"`
 	jwt.MapClaims `json:"details"`
 }
 
@@ -55,12 +57,13 @@ func (j *JwtWrapper) GenerateToken(userId uint, username string) (signedToken st
 }
 
 // FileGenerateSharedToken generates a jwt token for shared files
-func (j *JwtWrapper) FileGenerateSharedToken(ownerKey string) (signedToken string, err error) {
+func (j *JwtWrapper) FileGenerateSharedToken(ownerKey string, fileIds []string) (signedToken string, err error) {
 	// create the claims
 	var claims *FileJwtClaim
 	if j.ExpirationHours == 0 {
 		claims = &FileJwtClaim{
 			OwnerKey: ownerKey,
+			FileIds:  fileIds,
 			MapClaims: jwt.MapClaims{
 				"exp": nil,
 				"iss": j.Issuer,
@@ -70,6 +73,7 @@ func (j *JwtWrapper) FileGenerateSharedToken(ownerKey string) (signedToken strin
 	} else {
 		claims = &FileJwtClaim{
 			OwnerKey: ownerKey,
+			FileIds:  fileIds,
 			MapClaims: jwt.MapClaims{
 				"exp": time.Now().Local().Add(time.Hour * time.Duration(j.ExpirationHours)).Unix(),
 				"iss": j.Issuer,
@@ -89,6 +93,27 @@ func (j *JwtWrapper) FileGenerateSharedToken(ownerKey string) (signedToken strin
 	}
 
 	return
+}
+
+// get claims from token
+func GetClaimsFromToken(tokenString string, secretKey []byte) (jwt.MapClaims, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+
+		return secretKey, nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		return claims, nil
+	}
+
+	return nil, err
 }
 
 // ValidateToken validates the jwt token
