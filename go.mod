@@ -3,10 +3,10 @@ module github.com/cubetiq/cubetiq-utils-go
 go 1.17
 
 require (
-	github.com/gofiber/fiber/v2 v2.39.0
+	github.com/gofiber/fiber/v2 v2.40.1
 	github.com/golang-jwt/jwt/v4 v4.4.2
 	github.com/google/uuid v1.3.0
-	go.mongodb.org/mongo-driver v1.10.2
+	go.mongodb.org/mongo-driver v1.11.0
 	golang.org/x/crypto v0.0.0-20220817201139-bc19a97f63c8
 )
 
