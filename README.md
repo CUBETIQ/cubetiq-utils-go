@@ -10,6 +10,8 @@ Includes:
 - Number Utils
 - Date Utils
 - Error Utils
+- Array Utils
+- Crypto Utils
 
 # Contributors
 
