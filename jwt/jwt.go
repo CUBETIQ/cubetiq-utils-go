@@ -23,6 +23,12 @@ type JwtClaim struct {
 	jwt.MapClaims `json:"details"`
 }
 
+// UsernameJwtClaim adds username as a claim to the token
+type UsernameJwtClaim struct {
+	Username      string `json:"username"`
+	jwt.MapClaims `json:"details"`
+}
+
 // FileJwtClaim adds ownerkey as a claim to the token
 type FileJwtClaim struct {
 	OwnerKey      string   `json:"owner_key"`
@@ -35,6 +41,31 @@ func (j *JwtWrapper) GenerateToken(userId uint, username string) (signedToken st
 	// create the claims
 	claims := &JwtClaim{
 		Id:       userId,
+		Username: username,
+		MapClaims: jwt.MapClaims{
+			"exp": time.Now().Local().Add(time.Hour * time.Duration(j.ExpirationHours)).Unix(),
+			"iss": j.Issuer,
+			"iat": j.IssueAt,
+		},
+	}
+
+	// create token
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	// generate encoded token and send it as response
+	signedToken, err = token.SignedString([]byte(j.SecretKey))
+
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+// GenerateTokenByUsername generates a jwt token that take only username
+func (j *JwtWrapper) GenerateTokenByUsername(username string) (signedToken string, err error) {
+	// create the claims
+	claims := &UsernameJwtClaim{
 		Username: username,
 		MapClaims: jwt.MapClaims{
 			"exp": time.Now().Local().Add(time.Hour * time.Duration(j.ExpirationHours)).Unix(),
