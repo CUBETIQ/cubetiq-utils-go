@@ -37,6 +37,26 @@ func IsNotEmpty(s string) bool {
 	return s != ""
 }
 
+func HasPrefix(existString, newString string) bool {
+	return strings.HasPrefix(existString, newString)
+}
+
+func HasSuffix(existString, newString string) bool {
+	return strings.HasSuffix(existString, newString)
+}
+
+func TrimWhiteSpace(s string) string {
+	return strings.Trim(s, " ")
+}
+
+func ToLower(s string) string {
+	return strings.ToLower(s)
+}
+
+func ToUpper(s string) string {
+	return strings.ToUpper(s)
+}
+
 func GenerateRandomString(n int) (string, error) {
 	const letters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-"
 	ret := make([]byte, n)

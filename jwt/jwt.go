@@ -3,9 +3,16 @@ package jwt
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
+	stringutil "github.com/cubetiq/cubetiq-utils-go/string"
 	"github.com/golang-jwt/jwt/v4"
+)
+
+var (
+	AUTHORIZATION_HEADER = "Authorization"
+	TOKEN_PREFIX         = "bearer"
 )
 
 // JwtWrapper wraps the signing key and the issuer
@@ -36,8 +43,8 @@ type FileJwtClaim struct {
 	jwt.MapClaims `json:"details"`
 }
 
-// GenerateToken generates a jwt token
-func (j *JwtWrapper) GenerateToken(userId uint, username string) (signedToken string, err error) {
+// EncryptToken generates a jwt token
+func (j *JwtWrapper) EncryptToken(userId uint, username string) (signedToken string, err error) {
 	// create the claims
 	claims := &JwtClaim{
 		Id:       userId,
@@ -62,8 +69,8 @@ func (j *JwtWrapper) GenerateToken(userId uint, username string) (signedToken st
 	return
 }
 
-// GenerateTokenByUsername generates a jwt token that take only username
-func (j *JwtWrapper) GenerateTokenByUsername(username string) (signedToken string, err error) {
+// EncryptTokenByUsername generates a jwt token that take only username
+func (j *JwtWrapper) EncryptTokenByUsername(username string) (signedToken string, err error) {
 	// create the claims
 	claims := &UsernameJwtClaim{
 		Username: username,
@@ -87,8 +94,8 @@ func (j *JwtWrapper) GenerateTokenByUsername(username string) (signedToken strin
 	return
 }
 
-// FileGenerateSharedToken generates a jwt token for shared files
-func (j *JwtWrapper) FileGenerateSharedToken(ownerKey string, fileIds []string) (signedToken string, err error) {
+// FileEncryptSharedToken generates a jwt token for shared files
+func (j *JwtWrapper) FileEncryptSharedToken(ownerKey string, fileIds []string) (signedToken string, err error) {
 	// create the claims
 	var claims *FileJwtClaim
 	if j.ExpirationHours == 0 {
@@ -127,7 +134,7 @@ func (j *JwtWrapper) FileGenerateSharedToken(ownerKey string, fileIds []string) 
 }
 
 // get claims from token
-func GetClaimsFromToken(tokenString string, secretKey []byte) (jwt.MapClaims, error) {
+func DecryptToken(tokenString string, secretKey []byte) (jwt.MapClaims, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
@@ -147,30 +154,28 @@ func GetClaimsFromToken(tokenString string, secretKey []byte) (jwt.MapClaims, er
 	return nil, err
 }
 
-// ValidateToken validates the jwt token
-func (j *JwtWrapper) ValidateToken(signedToken string) (claims *JwtClaim, err error) {
-	token, err := jwt.ParseWithClaims(
-		signedToken,
-		&JwtClaim{},
-		func(t *jwt.Token) (interface{}, error) {
-			return []byte(j.SecretKey), nil
-		},
-	)
-
-	if err != nil {
-		return
+// get token without Bearer or bearer
+func ExtractToken(token string) (string, error) {
+	// if token is empty then send error
+	if stringutil.IsEmpty(token) {
+		return "", errors.New("token is required")
 	}
 
-	claims, ok := token.Claims.(*JwtClaim)
-	if !ok {
-		err = errors.New("Couldn't parse claims")
-		return
+	// get split token
+	getSplitToken := strings.Split(token, " ")
+	// get token
+	getBearer := stringutil.ToLower(getSplitToken[0])
+	if getBearer != TOKEN_PREFIX {
+		return "", errors.New("bearer is required")
 	}
 
-	if !claims.VerifyExpiresAt(time.Now().Local().Unix(), true) {
-		err = errors.New("JWT is expired")
-		return
+	// get token without Bearer
+	getToken := getSplitToken[1]
+
+	// validate again with token that has three dots or not if not then send error
+	if len(strings.Split(getToken, ".")) != 3 {
+		return "", errors.New("token is invalid")
 	}
 
-	return
+	return getToken, nil
 }
