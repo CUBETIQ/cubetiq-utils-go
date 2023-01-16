@@ -2,22 +2,15 @@ package password
 
 import "golang.org/x/crypto/bcrypt"
 
-// encrypts user password
-func HashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 10)
-	if err != nil {
-		return "", err
-	}
-
-	return string(bytes), nil
+// encrypts raw password
+func HashPassword(rawPassword string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(rawPassword), 10)
+	return string(bytes), err
 }
 
-// check user password
-func CheckPassword(password string, userPassword string) error {
-	err := bcrypt.CompareHashAndPassword([]byte(userPassword), []byte(password))
-	if err != nil {
-		return err
-	}
+// compare raw password with hash password
+func CheckPassword(rawPassword string, hashPassword string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hashPassword), []byte(rawPassword))
 
-	return nil
+	return err == nil
 }
