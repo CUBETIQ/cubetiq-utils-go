@@ -3,8 +3,10 @@ package file
 import (
 	"errors"
 	"fmt"
+	"math"
 	"mime/multipart"
 	"os"
+	"strconv"
 	"strings"
 
 	stringutil "github.com/cubetiq/cubetiq-utils-go/string"
@@ -49,7 +51,7 @@ func SaveMultipartToFile(c *fiber.Ctx, f *multipart.FileHeader, path string, fil
 
 	// save file
 	formatFilePath := fmt.Sprint(destFile)
-	
+
 	c.SaveFile(f, formatFilePath)
 
 	return f
@@ -69,4 +71,24 @@ func RemoveDirectory(directory string) {
 	if err != nil {
 		fmt.Println(err)
 	}
+}
+
+func FormatFileSize(val float64) (size float64, unit, format, normalized string) {
+	var round float64
+	suffixes := [5]string{"B", "KB", "MB", "GB", "TB"}
+	base := math.Log(val) / math.Log(1024)
+	value := math.Pow(1024, base-math.Floor(base))
+	pow := math.Pow(10, float64(2))
+	digit := pow * value
+	_, div := math.Modf(digit)
+	if div >= .5 {
+		round = math.Ceil(digit)
+	} else {
+		round = math.Floor(digit)
+	}
+	size = round / pow
+	unit = suffixes[int(math.Floor(base))]
+	format = strconv.FormatFloat(size, 'f', -1, 64)
+	normalized = format + " " + unit
+	return
 }
