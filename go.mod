@@ -6,7 +6,7 @@ require (
 	github.com/gofiber/fiber/v2 v2.41.0
 	github.com/golang-jwt/jwt/v4 v4.4.3
 	github.com/google/uuid v1.3.0
-	go.mongodb.org/mongo-driver v1.11.1
+	go.mongodb.org/mongo-driver v1.11.2
 	golang.org/x/crypto v0.6.0
 )
 
