@@ -10,7 +10,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var (
+const (
 	AUTHORIZATION_HEADER = "Authorization"
 	TOKEN_PREFIX         = "bearer"
 )
@@ -25,7 +25,7 @@ type JwtWrapper struct {
 
 // JwtClaim adds username and user id as a claim to the token
 type JwtClaim struct {
-	Id            uint   `json:"id"`
+	ID            string `json:"id"`
 	Username      string `json:"username"`
 	jwt.MapClaims `json:"details"`
 }
@@ -44,10 +44,10 @@ type FileJwtClaim struct {
 }
 
 // EncryptToken generates a jwt token
-func (j *JwtWrapper) EncryptToken(userId uint, username string) (signedToken string, err error) {
+func (j *JwtWrapper) EncryptToken(userId string, username string) (signedToken string, err error) {
 	// create the claims
 	claims := &JwtClaim{
-		Id:       userId,
+		ID:       userId,
 		Username: username,
 		MapClaims: jwt.MapClaims{
 			"exp": time.Now().Local().Add(time.Hour * time.Duration(j.ExpirationHours)).Unix(),
@@ -69,7 +69,7 @@ func (j *JwtWrapper) EncryptToken(userId uint, username string) (signedToken str
 	return
 }
 
-// EncryptTokenByUsername generates a jwt token that take only username
+// EncryptTokenByUsername generates a jwt token that takes only username
 func (j *JwtWrapper) EncryptTokenByUsername(username string) (signedToken string, err error) {
 	// create the claims
 	claims := &UsernameJwtClaim{
@@ -137,7 +137,7 @@ func (j *JwtWrapper) DecryptToken(tokenString string) (*JwtClaim, error) {
 	return DecryptToken(tokenString, []byte(j.SecretKey))
 }
 
-// get claims from token
+// DecryptToken get claims from token
 func DecryptToken(tokenString string, secretKey []byte) (*JwtClaim, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -151,14 +151,22 @@ func DecryptToken(tokenString string, secretKey []byte) (*JwtClaim, error) {
 		return nil, err
 	}
 
-	if claims, ok := token.Claims.(JwtClaim); ok && token.Valid {
-		return &claims, nil
+	if !token.Valid {
+		return nil, errors.New("invalid token")
 	}
 
-	return nil, err
+	claim, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return nil, errors.New("invalid token")
+	}
+
+	return &JwtClaim{
+		ID:       claim["id"].(string),
+		Username: claim["username"].(string),
+	}, nil
 }
 
-// get token without Bearer or bearer
+// ExtractToken get token without Bearer or bearer
 func ExtractToken(token string) (string, error) {
 	// if token is empty then send error
 	if stringutil.IsEmpty(token) {
@@ -176,7 +184,7 @@ func ExtractToken(token string) (string, error) {
 	// get token without Bearer
 	getToken := getSplitToken[1]
 
-	// validate again with token that has three dots or not if not then send error
+	// validate again with a token that has three dots or not if not then send error
 	if len(strings.Split(getToken, ".")) != 3 {
 		return "", errors.New("token is invalid")
 	}
