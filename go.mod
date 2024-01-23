@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/gofiber/fiber/v2 v2.44.0
 	github.com/golang-jwt/jwt/v5 v5.0.0
-	github.com/google/uuid v1.3.0
+	github.com/google/uuid v1.6.0
 	go.mongodb.org/mongo-driver v1.11.4
 	golang.org/x/crypto v0.8.0
 )
